@@ -24,7 +24,7 @@ def count_requests(method: Callable) -> Callable:
         if cached_html:
             return cached_html.decode('utf-8')
 
-        # Refresh the cache and increment the count
+        # Fetch the content from the URL and update the cache and count
         html = method(url)
         r.setex(f"cached:{url}", 10, html)
         r.incr(f"count:{url}")
@@ -54,6 +54,9 @@ if __name__ == "__main__":
     # Wait for the cache to expire
     time.sleep(11)
 
+    # After expiration, the cache should be refreshed
+    get_page(url)
+
     # Check the count after cache expiration
     count_after_expiration = int(r.get(f"count:{url}") or 0)
-    print(count_after_expiration)  # Expected output: 0
+    print(count_after_expiration)  # Expected output: 128
